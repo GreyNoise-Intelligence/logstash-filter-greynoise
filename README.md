@@ -5,7 +5,7 @@ It is fully free and fully open source. The license is Apache 2.0, meaning you a
 
 ## Documentation
 
-The Greynoise filter adds information about IP addresses from logstash events via the Greynoise API.
+The GreyNoise filter adds information about IP addresses from logstash events via the GreyNoise API.
 
 GreyNoise is a system that collects and analyzes data on Internet-wide scanners.
 GreyNoise collects data on benign scanners such as Shodan.io, as well as malicious actors like SSH and telnet worms.
@@ -26,19 +26,34 @@ $LS_HOME/bin/logstash-plugin install logstash-filter-greynoise-0.1.7.gem
 ```
 
 ### 2. Filter Configuration
-Add the following inside the filter section of your logstash configuration:
 
 ```sh
 filter {
   greynoise {
-    ip => "ip_value"                 # string (required, reference to ip address field)
-    key => "your_greynoise_key"      # string (optional, no default)
-    target => "greynoise"            # string (optional, default = greynoise)
-    hit_cache_size => 100            # number (optional, default = 0)
-    hit_cache_ttl => 6               # number (optional, default = 60) 
+    ip             => "ip_value"              # string (required, reference to ip address field)
+    full_context   => true                    # bool (optional, whether to use context lookup, default false)
+    key            => "your_greynoise_key"    # string (required)
+    target         => "greynoise"             # string (optional, default = greynoise)
+    hit_cache_size => 100                     # number (optional, default = 0)
+    hit_cache_ttl  => 6                       # number (optional, default = 60) 
   }
 }
 ```
+The GreyNoise Logstash filter plugin can be used in two different modes:
+
+##### Quick IP Enrichment
+In this mode documents (default) are enriched with a bool field `seen` which is true if GreyNoise has seen this IP or false otherwise. 
+
+This mode is faster than doing full enrichment and should be used for better performance on high-volume/-throughput event streams.
+If you have a data pipeline with multiple enrichment points, you can use the boolean field to later enrich the document with IP information from GreyNoise's context endpoint.
+
+##### Full IP Enrichment
+
+In this mode (`full_context => true`), documents are enriched with full context from GreyNoise API if the IP has been observed by GreyNoise. 
+
+This mode is slower than doing quick IP enrichment and might be reasonable for low-volume/-throughput event streams. 
+
+**NOTE**: Beware that the full context document from GreyNoise API can be large and as such the cache can grow quickly in size. Set the cache size accordingly to prevent high memory consumption by the cache.
 
 Print plugin version:
 
