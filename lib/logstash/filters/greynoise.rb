@@ -7,7 +7,7 @@ require "lru_redux"
 require 'net/http'
 require 'uri'
 
-VERSION = "0.1.8"
+VERSION = "1.0.0"
 
 class InvalidAPIKey < StandardError
 end

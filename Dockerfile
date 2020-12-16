@@ -1,8 +1,9 @@
 FROM jruby:9
 
 WORKDIR /usr/src/app
+RUN bundle config unset frozen
 
-COPY Rakefile Gemfile Gemfile.lock logstash-filter-greynoise.gemspec ./
+COPY Rakefile Gemfile logstash-filter-greynoise.gemspec ./
 COPY spec ./spec
 COPY lib ./lib
 

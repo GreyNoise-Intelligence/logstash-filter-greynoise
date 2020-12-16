@@ -1,0 +1,28 @@
+name: CI Test
+on:
+  pull_request:
+    paths:
+      - 'lib/**'
+      - 'spec/**'
+  push:
+    branches:
+      - master
+    paths:
+      - 'lib/**'
+      - 'spec/**'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: RSpec Tests
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+      - name: Run Tests
+        env:
+          GN_API_KEY: ${{ secrets.GN_TEST_API_KEY }}
+        run: |
+          bundle exec rspec
