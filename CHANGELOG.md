@@ -1,3 +1,5 @@
+## 1.0.0
+  - Add API quick lookup as default enrichment for logstash filter
 ## 0.1.0
   - Plugin created with the logstash plugin generator
 ## 0.1.1 
