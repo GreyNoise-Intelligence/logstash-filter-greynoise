@@ -22,7 +22,7 @@ describe LogStash::Filters::Greynoise do
       expected_fields.each do |f|
         insist { subject.get("greynoise") }.include?(f)
       end
-      insist { subject.get("greynoise").get("code").equal?("0x05") }
+      insist { subject.get("greynoise").get("classification").equal?("benign") }
     end
 
     sample("ip" => "4.2.1.A") do
