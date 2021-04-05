@@ -74,7 +74,7 @@ class LogStash::Filters::Greynoise < LogStash::Filters::Base
     # Switch to community API if an apikey was not provided
     if api_key.strip.empty?
       api_base = "https://api.greynoise.io/v3/community/"
-      @logger.warn("Greynoise API Key was not specified, defaulting to community API: " + api_base)
+      @logger.debug("Greynoise API Key was not specified, defaulting to community API: " + api_base)
     end
 
     @logger.debug("Greynoise API to use: " + api_base)
