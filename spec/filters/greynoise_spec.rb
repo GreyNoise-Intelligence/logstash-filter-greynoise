@@ -18,7 +18,7 @@ describe LogStash::Filters::Greynoise do
 
     sample("ip" => "8.8.8.8") do
       insist { subject }.include?("greynoise")
-      expected_fields = %w(ip seen code)
+      expected_fields = %w(ip classification)
       expected_fields.each do |f|
         insist { subject.get("greynoise") }.include?(f)
       end
