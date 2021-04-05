@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name          = 'logstash-filter-greynoise'
-  s.version       = '1.0.0'
+  s.version       = '1.1.0'
   s.licenses      = ['Apache-2.0']
   s.summary = 'This greynoise filter takes contents in the IP field and returns GreyNoise API data (see https://developer.greynoise.io/ for more info).'
   s.description     = 'This gem is a Logstash plugin required to be installed on top of the Logstash core pipeline using $LS_HOME/bin/logstash-plugin install logstash-filter-greynoise. This gem is not a stand-alone program'
