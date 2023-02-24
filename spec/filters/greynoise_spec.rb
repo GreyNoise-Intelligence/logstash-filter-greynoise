@@ -18,11 +18,11 @@ describe LogStash::Filters::Greynoise do
 
     sample("ip" => "8.8.8.8") do
       insist { subject }.include?("greynoise")
-      expected_fields = %w(ip seen code)
+      expected_fields = %w(ip classification)
       expected_fields.each do |f|
         insist { subject.get("greynoise") }.include?(f)
       end
-      insist { subject.get("greynoise").get("code").equal?("0x05") }
+      insist { subject.get("greynoise").get("classification").equal?("benign") }
     end
 
     sample("ip" => "4.2.1.A") do

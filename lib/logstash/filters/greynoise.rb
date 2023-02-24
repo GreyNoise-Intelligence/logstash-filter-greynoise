@@ -22,7 +22,7 @@ class LogStash::Filters::Greynoise < LogStash::Filters::Base
   #
   #  filter {
   #   greynoise {
-  #     ip => "ip"
+  #     ip => "%{[source][ip]}"
   #   }
   #  }
 
@@ -35,7 +35,7 @@ class LogStash::Filters::Greynoise < LogStash::Filters::Base
   config :full_context, :validate => :boolean, :default => false
 
   # greynoise enterprise api key
-  config :key, :validate => :string, :required => true
+  config :key, :validate => :string, :required => false
 
   # target top level key of hash response
   config :target, :validate => :string, :default => "greynoise"
@@ -69,9 +69,22 @@ class LogStash::Filters::Greynoise < LogStash::Filters::Base
       endpoint = "context/"
     end
 
-    uri = URI.parse("https://api.greynoise.io/v2/noise/" + endpoint + target_ip)
+    api_base = "https://api.greynoise.io/v2/noise/" + endpoint
+
+    # Switch to community API if an apikey was not provided
+    if api_key.strip.empty?
+      api_base = "https://api.greynoise.io/v3/community/"
+      @logger.debug("Greynoise API Key was not specified, defaulting to community API: " + api_base)
+    end
+
+    @logger.debug("Greynoise API to use: " + api_base)
+
+    uri = URI.parse(api_base + target_ip)
     request = Net::HTTP::Get.new(uri)
-    request["Key"] = api_key
+    if !api_key.strip.empty?
+      @logger.debug("Found Greynoise API key")
+      request["Key"] = api_key
+    end
     request["User-Agent"] = "logstash-filter-greynoise " + VERSION
     req_options = {
         use_ssl: uri.scheme == "https",
@@ -104,7 +117,7 @@ class LogStash::Filters::Greynoise < LogStash::Filters::Base
     end
 
     if valid
-      @logger.error("Invalid IP address, skipping", :ip => event.sprintf(ip), :event => event.to_hash)
+      @logger.warn("Invalid IP address, skipping", :ip => event.sprintf(ip), :event => event.to_hash)
       event.tag(@tag_on_failure)
       return
     end
@@ -120,6 +133,8 @@ class LogStash::Filters::Greynoise < LogStash::Filters::Base
       end
     end
 
+    @logger.debug("Could not find IP in local Greynoise cache, checking API...", :ip => event.sprintf(ip), :event => event.to_hash)
+
     # use GN API, since not found in cache
     begin
       gn_result = lookup_ip(event.sprintf(ip), event.sprintf(key), @full_context)
@@ -130,11 +145,12 @@ class LogStash::Filters::Greynoise < LogStash::Filters::Base
         end
 
         event.set(@target, gn_result)
+        @logger.debug("Successfully retrieved IP from Greynoise API...", :ip => event.sprintf(ip), :gn_result => gn_result, :event => event.to_hash)
         # filter_matched should go in the last line of our successful code
         filter_matched(event)
       end
     rescue InvalidAPIKey => _
-      @logger.error("unauthorized - check API key")
+      @logger.error("Unauthorized request to Greynoise - check API key", :ip => event.sprintf(ip), :event => event.to_hash)
       event.tag(@tag_on_auth_failure)
     end
   end
